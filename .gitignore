@@ -1,0 +1,27 @@
+# CubeIDE / build output
+Debug/
+Release/
+*.o
+*.elf
+*.bin
+*.map
+*.su
+*.d
+*.cyclo
+*.list
+
+# CubeIDE workspace metadata (local, machine-specific)
+.metadata/
+.settings/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+venv_soc/
+
+# Editors / OS
+.vscode/
+*.swp
+.DS_Store
