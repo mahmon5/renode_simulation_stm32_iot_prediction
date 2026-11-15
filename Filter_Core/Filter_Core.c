@@ -1,0 +1,22 @@
+#include "Filter_Core.h"
+#include <stdint.h>
+#include <math.h>
+
+void ma_init(ma_t *f){
+    for(int i=0;i<MA_WIN;i++) f->buf[i] = 0;
+    f->idx = 0;
+    f->n=0;
+    f->sum=0;
+}
+
+int32_t ma_update(ma_t *f, int x){
+    if(f->n==MA_WIN)f->sum -= f->buf[f->idx];else f->n++;
+    f->buf[f->idx] = x;
+    f->sum += x;
+    f->idx = (f->idx+1) % MA_WIN;
+    return f->sum / f->n;
+}
+
+int32_t pitch_cdeg(int ax_mg, int az_mg){
+    return (int32_t)(atan2f((float)ax_mg,(float)az_mg)*((180*100)/M_PI));
+}
