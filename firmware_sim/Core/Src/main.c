@@ -50,7 +50,7 @@ int ax, ay, az;
 int pitch_raw,pitch_filtered;
 uint8_t rx_byte ;
 int pos = 0;
-uint8_t line_ready = 1;
+volatile uint8_t line_ready = 1;
 ma_t filter1 , filter2, filter3;
 char line[64];
 /* USER CODE END PV */
@@ -113,10 +113,6 @@ int main(void)
 		   line_ready = 0;
 		   if (line[0] == '\0') continue;
 		   int r = sscanf(line, "%d,%d,%d", &ax, &ay, &az);
-		       char dbg[96];
-		       int n = snprintf(dbg, sizeof(dbg), "# r=%d line=[%s]\n", r, line);
-		       if (n > 0 && n < (int)sizeof(dbg))
-		           HAL_UART_Transmit(&huart2, (uint8_t*)dbg, n, 100);
 		       if (r == 3) {
 		   fx = (int)ma_update(&filter1, ax), fy = (int)ma_update(&filter2, ay), fz = (int)ma_update(&filter3, az);
 		   char out[100];

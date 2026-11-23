@@ -2,4 +2,4 @@ mach create "SoC"
 machine LoadPlatformDescription @platforms/boards/stm32f4_discovery-kit.repl
 emulation CreateServerSocketTerminal 4567 "term" false
 connector Connect sysbus.usart2 term
-sysbus LoadELF @/home/el-mahhh/Mini-Projet-SoC/firmware_sim/Debug/firmware_sim.elf
+sysbus LoadELF @firmware_sim/Debug/firmware_sim.elf

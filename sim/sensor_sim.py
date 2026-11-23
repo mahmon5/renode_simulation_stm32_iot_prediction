@@ -1,9 +1,15 @@
 import socket, math, random, csv
+import json, time
+import paho.mqtt.client as mqtt
+
+mq = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+mq.connect("localhost", 1883)
+mq.loop_start()
 
 HOST, PORT = "localhost", 4567
 N, FS = 500, 50
 
-# ---------- 1. capteur virtuel ----------
+
 def make_sensor(n, seed=42):
     rnd = random.Random(seed)
     rows = []
@@ -17,7 +23,7 @@ def make_sensor(n, seed=42):
         rows.append((round(ax), round(ay), round(az)))   # entiers en mg
     return rows
 
-# ---------- 2. référence (même logique que le C) ----------
+
 def c_div(a, b):                 # division entière du C : arrondi vers 0 (b > 0)
     q = abs(a) // b
     return q if a >= 0 else -q
@@ -34,7 +40,7 @@ class MA:                        # moyenne glissante sur 5 valeurs
 def pitch_cdeg(ax, az):          # centi-degrés, troncature vers 0 comme le C
     return int(math.atan2(ax, az) * 5729.578)
 
-# ---------- 3. dialogue avec le firmware ----------
+
 def read_reply(f):
     while True:
         line = f.readline()
@@ -76,9 +82,18 @@ for i, (ax, ay, az) in enumerate(make_sensor(N)):
         if bad <= 10:
             print(f"écart à i={i} : reçu {r[1:]} / attendu "
                   f"{[ax,ay,az,fax,fay,faz,exp_raw,exp_filt]}")
+    mq.publish("soc/node1/telemetry", json.dumps({
+               "t_ms": i*20, "ax": r[1], "ay": r[2], "az": r[3],
+               "pitch_raw": r[7], "pitch_filt": r[8]}))
+    if i % 50 == 0:
+        print("publié", i)
+    time.sleep(0.02)     
     out_rows.append([i*20] + r[1:])
 
 s.close()
+time.sleep(0.5)
+mq.loop_stop()
+mq.disconnect()
 print(f"{N} échantillons, {bad} écarts, erreur max d'angle = {max_pitch_err} centi-deg")
 
 with open("sim_data.csv", "w", newline="") as fh:

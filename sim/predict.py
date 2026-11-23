@@ -1,3 +1,4 @@
+import json
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
@@ -36,6 +37,12 @@ for name, X in [("brut", X_raw), ("filtré", X_filt)]:
     print(f"\nEntrée {name} :")
     print("  poids :", np.round(model.coef_, 3), " biais :", round(model.intercept_, 1))
 
+    if name == "filtré":                                   # modèle déployé par app_predict.py
+        with open("model.json", "w") as fh:
+            json.dump({"coef": model.coef_.tolist(),
+                       "intercept": float(model.intercept_)}, fh)
+        print("  model.json écrit")
+
 print(f"\n{len(y)} exemples, {split} pour l'entraînement, {len(y) - split} pour le test")
 print(f"{'entrée':<8}{'méthode':<12}{'MAE (cdeg)':>12}{'RMSE (cdeg)':>13}{'MAE (deg)':>11}")
 for name, (nv, rg, _) in results.items():
@@ -46,7 +53,7 @@ for name, (nv, rg, _) in results.items():
 t = df["t_ms"].to_numpy()[W - 1 + H + split : W - 1 + H + split + len(y_test)] / 1000
 plt.figure(figsize=(9, 4))
 plt.plot(t, y_test / 100, label="cible (angle filtré à +100 ms)")
-plt.plot(t, results["filtré"][0] and X_filt[split:, -1] / 100, "--", label="naïve (filtré)")
+plt.plot(t, X_filt[split:, -1] / 100, "--", label="naïve (filtré)")
 plt.plot(t, results["filtré"][2] / 100, label="régression (entrée filtrée)")
 plt.xlabel("temps (s)"); plt.ylabel("angle (deg)"); plt.legend(); plt.tight_layout()
 plt.savefig("resultats_s7.png", dpi=150)
